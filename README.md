@@ -1,4 +1,4 @@
-# 🛡️ FinSentinel: Autonomous Stock Anomaly Detection & Agentic Alert System
+# FinSentinel: Autonomous Stock Anomaly Detection & Agentic Alert System
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/yourusername/FinSentinel/blob/main/FinSentinel_Colab.ipynb)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
@@ -9,7 +9,7 @@
 
 ---
 
-## 🎯 Problem Statement
+## Problem Statement
 
 Financial market anomalies — flash crashes, insider trading signals, earnings shocks, liquidity crises — cause billions in losses annually. Detecting them in real-time is challenging because:
 
@@ -20,52 +20,6 @@ Financial market anomalies — flash crashes, insider trading signals, earnings 
 
 **FinSentinel solves all four gaps** with a unified ML + DL + RL + Agentic AI pipeline.
 
----
-
-## 🏗️ Architecture
-
-```
-Raw OHLCV Data (Yahoo Finance)
-         │
-         ▼
-┌─────────────────────┐
-│  Feature Engineering │  ← 16 technical indicators
-│  (log returns, RSI, │     (volatility, MACD, BB, volume)
-│   MACD, Bollinger)  │
-└─────────┬───────────┘
-          │
-    ┌─────┴──────┐
-    │            │
-    ▼            ▼
-┌──────────┐  ┌──────────────────┐
-│ Isolation│  │  LSTM Autoencoder │
-│  Forest  │  │  (seq_len=20)    │
-│  (ML)    │  │  (DL)            │
-└────┬─────┘  └────────┬─────────┘
-     │                 │
-     └────────┬────────┘
-              ▼
-    ┌──────────────────┐
-    │  Weighted Ensemble│  ← 0.4·IF + 0.6·LSTM
-    │  Anomaly Score   │
-    └────────┬─────────┘
-             │
-             ▼
-    ┌──────────────────┐
-    │   DQN RL Agent   │  ← Learns adaptive alert policy
-    │   Alert/Monitor  │     Reward: precision-aware
-    └────────┬─────────┘
-             │
-             ▼
-    ┌──────────────────┐
-    │  Agentic AI      │  ← Claude (tool-use loop)
-    │  (Claude)        │     Calls: analyze, compare,
-    │                  │     report generation tools
-    └──────────────────┘
-```
-
----
-
 ## 🧪 Results
 
 | Method | Avg Precision | Avg Recall | Avg F1 |
@@ -75,14 +29,11 @@ Raw OHLCV Data (Yahoo Finance)
 | LSTM AE Only | ~0.58 | ~0.50 | ~0.54 |
 | **FinSentinel (Ours)** | **~0.71** | **~0.63** | **~0.67** |
 
-*Results on AAPL, TSLA, AMZN, MSFT, GOOGL (2020–2024)*
-
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### Option 1: Google Colab (Recommended)
-Click the "Open in Colab" badge above — no local setup needed.
+### Option 1: Google Colab 
 
 ### Option 2: Local
 ```bash
@@ -91,15 +42,6 @@ cd FinSentinel
 pip install -r requirements.txt
 jupyter notebook FinSentinel_Colab.ipynb
 ```
-
-### API Key Setup
-```python
-# In the notebook, set your Anthropic API key:
-ANTHROPIC_API_KEY = "sk-ant-..."  # Cell 2, Configuration section
-```
-Get a free key at [console.anthropic.com](https://console.anthropic.com)
-
----
 
 ## 📦 Tech Stack
 
@@ -114,7 +56,7 @@ Get a free key at [console.anthropic.com](https://console.anthropic.com)
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 FinSentinel/
@@ -151,9 +93,9 @@ See [`research_paper.md`](research_paper.md) for the full IMRaD-structured paper
 
 ---
 
-## 🤖 Agentic AI Demo
+## Agentic AI Demo
 
-The Claude-powered agent autonomously:
+The Grok-powered agent autonomously:
 1. Queries the ML/DL/RL pipeline via tools
 2. Compares anomaly levels across the portfolio
 3. Fetches technical risk metrics for context
@@ -164,34 +106,4 @@ agent = FinSentinelAgent(api_key=ANTHROPIC_API_KEY)
 report = agent.run(
     "Scan all 5 stocks and flag any with CRITICAL anomaly risk"
 )
-```
-
----
-
-## 👤 Author
-
-**Varish [Last Name]**  
-B.Tech, Thapar Institute of Engineering & Technology  
-Department of Computer Science & Engineering
-
----
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE)
-
----
-
-## ⭐ Citation
-
-If you use FinSentinel in your research:
-
-```bibtex
-@article{finsentinel2025,
-  title     = {FinSentinel: A Hybrid ML-DL-RL Framework with Agentic AI
-               for Interpretable Stock Market Anomaly Detection},
-  author    = {[Your Name]},
-  journal   = {[Target Venue]},
-  year      = {2025}
-}
 ```
