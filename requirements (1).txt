@@ -4,7 +4,7 @@ tensorflow==2.15.1
 keras==2.15.0
 stable-baselines3[extra]>=2.0.0
 gymnasium>=0.29.0
-anthropic>=0.34.0
+groq
 plotly>=5.18.0
 matplotlib>=3.7.0
 pandas>=2.0.0
