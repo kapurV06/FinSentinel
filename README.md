@@ -1,6 +1,6 @@
 # FinSentinel
 
-Stock anomaly detection pipeline for equities. Combines Isolation Forest, LSTM Autoencoder, and a DQN alert agent — trained on 2020–2023, evaluated on held-out 2024 data.
+Stock market anomaly detection pipeline combining Isolation Forest, LSTM Autoencoder, and a DQN alert policy across 15 US equities spanning six market sectors. Trained on 2020–2023, evaluated on held-out 2024 data. Includes an LLM-based agentic layer for automated analyst-style report generation.
 
 ---
 
@@ -8,65 +8,79 @@ Stock anomaly detection pipeline for equities. Combines Isolation Forest, LSTM A
 
 | Layer | Method | Role |
 |-------|--------|------|
-| ML | Isolation Forest | Unsupervised anomaly scoring |
-| DL | LSTM Autoencoder | Temporal reconstruction-error scoring |
-| Ensemble | 0.4 · IF + 0.6 · LSTM | Fused anomaly score |
-| RL | DQN (Stable-Baselines3) | Learned alert policy |
+| ML | Isolation Forest (contamination=0.05) | Unsupervised anomaly scoring |
+| DL | LSTM Autoencoder (seq_len=20, latent_dim=32) | Temporal reconstruction-error scoring |
+| Ensemble | 0.40 × IF + 0.60 × LSTM | Fused anomaly score |
+| RL | DQN (net_arch=[256,256,128], 150k timesteps) | Learned selective alert policy |
 | Agentic | Groq + Llama 3.3 70B | Analyst-style report generation |
+
+---
+
+## Key Design Decisions
+
+**Volatility-adjusted ground truth.** A timestep is labelled anomalous if the 5-day forward return exceeds `max(0.02, volatility_20d × 1.5)`. This adapts the anomaly definition to each ticker's own volatility regime rather than applying a uniform threshold across all stocks.
+
+**RL alert policy.** The DQN learns when to issue an alert given a 6-dimensional state: ensemble score, IF score, LSTM score, log return, volume ratio, normalised RSI. The reward function penalises false alarms proportionally to the agent's running alert rate, which directly discourages the degenerate all-alert policy.
+
+**Chronological split.** Hard boundary at 2023-12-31. No data from the test period (2024) touches training in any component.
 
 ---
 
 ## Results
 
-Evaluated on 5 tickers (AAPL, TSLA, AMZN, MSFT, GOOGL) — test split 2024-01-01 to 2024-12-31.
+Evaluated on 15 tickers across six sectors: Technology (AAPL, MSFT, GOOGL, AMZN), Semiconductors (NVDA, AMD), Financials (JPM, GS), Healthcare (JNJ, PFE), Energy (XOM, CVX), Consumer/Media (NFLX, DIS).
 
-**DQN agent — out-of-sample performance:**
+**Baseline comparison — test split 2024:**
 
-| Ticker | Precision | Recall | F1 | Alert Rate |
-|--------|-----------|--------|----|------------|
-| AAPL | 0.551 | 0.970 | 0.703 | 95.5% |
-| TSLA | 0.796 | 1.000 | 0.886 | 100.0% |
-| AMZN | 0.580 | 1.000 | 0.734 | 100.0% |
-| MSFT | 0.550 | 0.858 | 0.671 | 85.3% |
-| GOOGL | 0.659 | 0.747 | 0.700 | 69.4% |
+| Method | Avg Precision | Avg Recall | Avg F1 |
+|--------|--------------|------------|--------|
+| Z-Score Baseline | 0.494 | 0.026 | 0.049 |
+| IF Only | 0.381 | 0.040 | 0.072 |
+| FinSentinel (Ensemble+RL) | 0.482 | 0.380 | 0.417 |
 
-LSTM Autoencoder val_loss: 0.425 (AAPL) · 0.399 (TSLA) · 0.411 (AMZN) · 0.448 (MSFT) · 0.508 (GOOGL)
+5.8× F1 improvement over the strongest baseline.
 
-**Known limitation:** alert rate on TSLA and AMZN is 100% — the DQN hasn't learned selectiveness on those tickers. FP penalty is -2.5; may need further tuning.
+**Ablation study — mean F1 by pipeline depth:**
+
+| Stage | Mean F1 |
+|-------|---------|
+| IF Only | 0.072 |
+| Ensemble without RL | 0.061 |
+| Full Pipeline | 0.417 |
+
+**Event-anchored validation:** 70.7% mean hit rate across 15 tickers on 10 known 2024 market events (±3 trading day window, no event supervision). XOM 10/10, AAPL 9/10, PFE 9/10.
+
+**Bootstrap 95% CIs** computed over 1,000 resamples. All intervals strictly above zero. Mean F1: 0.416.
 
 ---
 
-## Evaluation protocol
+## Notebooks
 
-80/20 chronological split. IF and LSTM trained on full 2020–2023 window. DQN trained on 2020–2023 environment, weights frozen for 2024 evaluation — no leakage.
+| File | Purpose |
+|------|---------|
+| `FinSentinel_1_Training.ipynb` | Full pipeline training — data, features, IF, LSTM, DQN. Saves models and artifacts to Google Drive. Run once. |
+| `FinSentinel_2_Evaluation.ipynb` | Loads from Drive, runs evaluation, ablation, statistical significance, event validation, agentic layer. No retraining required. |
 
 ---
 
 ## Stack
 
-`Python` · `TensorFlow/Keras` · `scikit-learn` · `stable-baselines3` · `yfinance` · `Plotly` · `Streamlit` · `Groq API`
+`Python` · `TensorFlow/Keras` · `scikit-learn` · `stable-baselines3` · `yfinance` · `Groq API` · `Plotly`
 
 ---
 
-## Run it
+## Paper
+
+Submitted to Expert Systems with Applications (Elsevier). Preprint available via SSRN on submission.
+
+---
+
+## Setup
 
 ```bash
 git clone https://github.com/kapurV06/FinSentinel
 cd FinSentinel
 pip install -r requirements.txt
-streamlit run app.py
 ```
 
-Or open `FinSentinel_Colab.ipynb` in Google Colab.
-
----
-
-## Files
-
-```
-FinSentinel/
-├── FinSentinel_Colab.ipynb   # Full pipeline notebook
-├── app.py                    # Streamlit dashboard
-├── requirements.txt
-└── README.md
-```
+Open `FinSentinel_1_Training.ipynb` in Google Colab with GPU runtime. Add your `GROQ_API_KEY` to Colab secrets. Run Notebook 1 once, then use Notebook 2 for all evaluation.
