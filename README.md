@@ -50,6 +50,23 @@ Evaluated on 15 tickers across six sectors: Technology (AAPL, MSFT, GOOGL, AMZN)
 
 **Event-anchored validation:** 70.7% mean hit rate across 15 tickers on 10 known 2024 market events (±3 trading day window, no event supervision). XOM 10/10, AAPL 9/10, PFE 9/10.
 
+**Event coverage (2024):**
+
+| Event | Date | Caught by majority of tickers |
+|-------|------|-------------------------------|
+| US jobs report beats expectations | 2024-01-05 | Yes |
+| CPI inflation data release | 2024-01-12 | Yes |
+| Hot CPI print delays rate cut expectations | 2024-02-13 | No |
+| Fed holds rates, signals 3 cuts in 2024 | 2024-03-20 | Yes |
+| Global selloff on Middle East escalation | 2024-04-19 | Yes |
+| Fed meeting — rates held, dovish tone | 2024-05-01 | Yes |
+| CPI cooler than expected, rate cut hopes surge | 2024-07-11 | Yes |
+| Global selloff Japan carry trade unwind | 2024-08-05 | Yes |
+| Fed first rate cut 50bps | 2024-09-18 | No |
+| Trump election win market surge | 2024-11-06 | Yes |
+
+8 out of 10 events caught by the majority of tickers. The two misses — the February CPI print and the September rate cut — produced muted price reactions relative to each ticker's volatility threshold, explaining why the RL agent did not flag them.
+
 **Bootstrap 95% CIs** computed over 1,000 resamples. All intervals strictly above zero. Mean F1: 0.416.
 
 ---
